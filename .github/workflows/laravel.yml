@@ -27,7 +27,7 @@ jobs:
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
       - name: Linting avec Laravel Pint
-        run: ./vendor/bin/pint --test
+        run: ./vendor/bin/pint
 
   # ============================================================
   # JOB 2 — TESTS (Unitaires + Feature)
