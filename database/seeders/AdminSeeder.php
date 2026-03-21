@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Utilisateur;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
@@ -15,7 +14,7 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         // Vérifie si l'admin existe déjà
-        if (!Utilisateur::where('email', 'admin@gmail.com')->exists()) {
+        if (! Utilisateur::where('email', 'admin@gmail.com')->exists()) {
             Utilisateur::create([
                 'nom' => 'Admin',
                 'email' => 'admin@gmail.com',
@@ -27,6 +26,6 @@ class AdminSeeder extends Seeder
         } else {
             $this->command->info('L’administrateur existe déjà.');
         }
-    
+
     }
 }

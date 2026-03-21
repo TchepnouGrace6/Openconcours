@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Concours;
 use App\Models\Logs;
+use Illuminate\Http\Request;
 
 class ConcoursController extends Controller
 {
@@ -12,6 +12,7 @@ class ConcoursController extends Controller
     public function index()
     {
         $concours = Concours::with(['filiere', 'niveau'])->paginate(10);
+
         return response()->json($concours);
     }
 
@@ -19,7 +20,10 @@ class ConcoursController extends Controller
     public function show($id)
     {
         $concours = Concours::with(['filiere', 'niveau'])->find($id);
-        if (!$concours) return response()->json(['message' => 'Concours non trouvé'], 404);
+        if (! $concours) {
+            return response()->json(['message' => 'Concours non trouvé'], 404);
+        }
+
         return response()->json($concours);
     }
 
@@ -28,7 +32,7 @@ class ConcoursController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
@@ -50,13 +54,13 @@ class ConcoursController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Création concours',
-            'details' => 'Concours: ' . $concours->nom,
+            'details' => 'Concours: '.$concours->nom,
             'ip' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Concours créé avec succès',
-            'concours' => $concours
+            'concours' => $concours,
         ], 201);
     }
 
@@ -65,12 +69,14 @@ class ConcoursController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
         $concours = Concours::find($id);
-        if (!$concours) return response()->json(['message' => 'Concours non trouvé'], 404);
+        if (! $concours) {
+            return response()->json(['message' => 'Concours non trouvé'], 404);
+        }
 
         $concours->update($request->all());
 
@@ -78,13 +84,13 @@ class ConcoursController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Modification concours',
-            'details' => 'Concours: ' . $concours->nom,
+            'details' => 'Concours: '.$concours->nom,
             'ip' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Concours mis à jour avec succès',
-            'concours' => $concours
+            'concours' => $concours,
         ]);
     }
 
@@ -93,12 +99,14 @@ class ConcoursController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
-        
+
         $concours = Concours::find($id);
-        if (!$concours) return response()->json(['message' => 'Concours non trouvé'], 404);
+        if (! $concours) {
+            return response()->json(['message' => 'Concours non trouvé'], 404);
+        }
 
         $nomConcours = $concours->nom;
         $concours->delete();
@@ -107,7 +115,7 @@ class ConcoursController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Suppression concours',
-            'details' => 'Concours: ' . $nomConcours,
+            'details' => 'Concours: '.$nomConcours,
             'ip' => request()->ip(),
         ]);
 

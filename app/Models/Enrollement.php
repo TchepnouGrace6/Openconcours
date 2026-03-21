@@ -4,11 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Utilisateur;
-use App\Models\ConcoursSession;
-use App\Models\Paiement;
-use App\Models\CentreExamen;
-use App\Models\Salle;
 
 class Enrollement extends Model
 {

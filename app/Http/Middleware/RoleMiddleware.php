@@ -9,7 +9,7 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, $role)
     {
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             return response()->json(['message' => 'Non authentifié'], 401);
         }
 

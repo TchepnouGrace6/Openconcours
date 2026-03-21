@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\CentreExamen;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CentreExamen>
@@ -15,13 +15,13 @@ class CentreExamenFactory extends Factory
      *
      * @return array<string, mixed>
      */
-       protected $model = CentreExamen::class;
- 
+    protected $model = CentreExamen::class;
+
     public function definition(): array
     {
         return [
-            'nom'      => 'Centre ' . $this->faker->unique()->city(), // string
-            'adresse'  => $this->faker->streetAddress(),              // string
+            'nom' => 'Centre '.$this->faker->unique()->city(), // string
+            'adresse' => $this->faker->streetAddress(),              // string
             'capacite' => $this->faker->numberBetween(50, 500),       // integer
         ];
     }

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('centre_depot', function (Blueprint $table) {
             $table->id();
-             $table->foreignId('concours_id')->constrained('concours')->onDelete('cascade'); // lien filière
+            $table->foreignId('concours_id')->constrained('concours')->onDelete('cascade'); // lien filière
             $table->string('nom');
             $table->string('adresse')->nullable();
             $table->timestamps();

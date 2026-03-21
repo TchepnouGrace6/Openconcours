@@ -6,8 +6,6 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-
-
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
@@ -25,7 +23,7 @@ class DatabaseSeeder extends Seeder
         ]);*/
         $this->call([
             AdminSeeder::class,
-    ]);
+        ]);
 
     }
 }

@@ -11,37 +11,37 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, ...$roles)
     {
         // Vérifier l'authentification
-        if (!auth()->check()) {
+        if (! auth()->check()) {
             Log::warning('Tentative d\'accès non authentifié', [
                 'ip' => $request->ip(),
                 'route' => $request->route()->getName(),
-                'url' => $request->fullUrl()
+                'url' => $request->fullUrl(),
             ]);
-            
+
             return response()->json([
                 'message' => 'Non authentifié',
-                'error' => 'UNAUTHENTICATED'
+                'error' => 'UNAUTHENTICATED',
             ], 401);
         }
 
         $user = auth()->user();
-        
+
         // Vérifier si l'utilisateur a l'un des rôles requis
-        if (!in_array($user->role, $roles)) {
+        if (! in_array($user->role, $roles)) {
             Log::warning('Tentative d\'accès non autorisé', [
                 'user_id' => $user->id,
                 'user_role' => $user->role,
                 'required_roles' => $roles,
                 'ip' => $request->ip(),
                 'route' => $request->route()->getName(),
-                'url' => $request->fullUrl()
+                'url' => $request->fullUrl(),
             ]);
-            
+
             return response()->json([
                 'message' => 'Accès interdit. Rôle insuffisant.',
                 'error' => 'FORBIDDEN',
                 'required_roles' => $roles,
-                'user_role' => $user->role
+                'user_role' => $user->role,
             ], 403);
         }
 
@@ -50,7 +50,7 @@ class RoleMiddleware
             'user_id' => $user->id,
             'user_role' => $user->role,
             'route' => $request->route()->getName(),
-            'method' => $request->method()
+            'method' => $request->method(),
         ]);
 
         return $next($request);

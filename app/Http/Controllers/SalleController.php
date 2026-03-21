@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Salle;
-use App\Models\CentreExamen;
 use App\Models\Logs;
+use App\Models\Salle;
+use Illuminate\Http\Request;
 
 class SalleController extends Controller
 {
@@ -15,6 +14,7 @@ class SalleController extends Controller
     public function index()
     {
         $salles = Salle::with('centre')->paginate(10);
+
         return response()->json($salles);
     }
 
@@ -24,7 +24,10 @@ class SalleController extends Controller
     public function show($id)
     {
         $salle = Salle::with('centre')->find($id);
-        if (!$salle) return response()->json(['message' => 'Salle non trouvée'], 404);
+        if (! $salle) {
+            return response()->json(['message' => 'Salle non trouvée'], 404);
+        }
+
         return response()->json($salle);
     }
 
@@ -35,7 +38,7 @@ class SalleController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
@@ -50,7 +53,7 @@ class SalleController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Création salle',
-            'details' => 'Salle: ' . $salle->nom_salle,
+            'details' => 'Salle: '.$salle->nom_salle,
             'ip' => $request->ip(),
         ]);
 
@@ -64,12 +67,14 @@ class SalleController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
         $salle = Salle::find($id);
-        if (!$salle) return response()->json(['message' => 'Salle non trouvée'], 404);
+        if (! $salle) {
+            return response()->json(['message' => 'Salle non trouvée'], 404);
+        }
 
         $request->validate([
             'nom_salle' => 'required|string',
@@ -82,7 +87,7 @@ class SalleController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Mise à jour salle',
-            'details' => 'Salle ID: ' . $id,
+            'details' => 'Salle ID: '.$id,
             'ip' => $request->ip(),
         ]);
 
@@ -96,19 +101,21 @@ class SalleController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
-        
+
         $salle = Salle::find($id);
-        if (!$salle) return response()->json(['message' => 'Salle non trouvée'], 404);
+        if (! $salle) {
+            return response()->json(['message' => 'Salle non trouvée'], 404);
+        }
 
         $salle->delete();
 
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Suppression salle',
-            'details' => 'Salle ID: ' . $id,
+            'details' => 'Salle ID: '.$id,
             'ip' => request()->ip(),
         ]);
 

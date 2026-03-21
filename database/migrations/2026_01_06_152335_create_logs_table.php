@@ -12,12 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('logs', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('utilisateur_id')->nullable()->constrained()->onDelete('set null'); // qui a fait l'action
-        $table->string('action'); // ex : "Création de concours", "Paiement validé"
-        $table->text('details')->nullable(); // infos supplémentaires
-        $table->string('ip')->nullable(); // IP de l'utilisateur
-        $table->timestamps();
+            $table->id();
+            $table->foreignId('utilisateur_id')->nullable()->constrained()->onDelete('set null'); // qui a fait l'action
+            $table->string('action'); // ex : "Création de concours", "Paiement validé"
+            $table->text('details')->nullable(); // infos supplémentaires
+            $table->string('ip')->nullable(); // IP de l'utilisateur
+            $table->timestamps();
         });
     }
 

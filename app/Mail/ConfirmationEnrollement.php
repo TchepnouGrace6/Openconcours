@@ -28,9 +28,9 @@ class ConfirmationEnrollement extends Mailable
     {
         // Ici on construit l'email HTML simple
         return $this->subject('Confirmation de votre candidature au concours')
-                    ->view('emails.confirmation_enrollement')
-                    ->with([
-                        'enrollement' => $this->enrollement,
-                    ]);
+            ->view('emails.confirmation_enrollement')
+            ->with([
+                'enrollement' => $this->enrollement,
+            ]);
     }
 }

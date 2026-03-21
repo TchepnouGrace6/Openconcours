@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ConfirmationEnrollement;
+use App\Models\CentreExamen;
+use App\Models\ConcoursSession;
+use App\Models\Enrollement;
+use App\Models\Logs;
+use App\Models\Paiement;
+use App\Models\Salle;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Barryvdh\DomPDF\Facade\Pdf;
-
-use App\Models\Enrollement;
-use App\Models\Paiement;
-use App\Models\Logs;
-use App\Models\CentreExamen;
-use App\Models\CentreDepot;
-use App\Models\Salle;
-use App\Models\ConcoursSession;
-use App\Mail\ConfirmationEnrollement;
 
 class EnrollementController extends Controller
 {
@@ -30,7 +28,7 @@ class EnrollementController extends Controller
                 'paiement',
                 'centreExamen',
                 'centreDepot',
-                'salle'
+                'salle',
             ])->orderByDesc('created_at')->paginate(10)
         );
     }
@@ -46,10 +44,10 @@ class EnrollementController extends Controller
             'paiement',
             'centreExamen',
             'centreDepot',
-            'salle'
+            'salle',
         ])->find($id);
 
-        if (!$enrollement) {
+        if (! $enrollement) {
             return response()->json(['message' => 'Enrôlement non trouvé'], 404);
         }
 
@@ -63,9 +61,9 @@ class EnrollementController extends Controller
     {
         $request->validate([
             'concours_session_id' => 'required|exists:concours_sessions,id',
-            'centre_examen_id'    => 'required|exists:centres_examen,id',
-            'centre_depot_id'     => 'required|exists:centre_depot,id',
-            'numero_recu'         => 'required|string',
+            'centre_examen_id' => 'required|exists:centres_examen,id',
+            'centre_depot_id' => 'required|exists:centre_depot,id',
+            'numero_recu' => 'required|string',
 
             'prenom' => 'required|string',
             'nom' => 'required|string',
@@ -103,9 +101,9 @@ class EnrollementController extends Controller
                 ->where('statut', 'paye')
                 ->first();
 
-            if (!$paiement) {
+            if (! $paiement) {
                 return response()->json([
-                    'message' => 'Numéro de reçu invalide ou paiement non confirmé'
+                    'message' => 'Numéro de reçu invalide ou paiement non confirmé',
                 ], 403);
             }
 
@@ -114,7 +112,7 @@ class EnrollementController extends Controller
              */
             if (Enrollement::where('numero_recu', $request->numero_recu)->exists()) {
                 return response()->json([
-                    'message' => 'Ce numéro de reçu a déjà servi à un enrôlement'
+                    'message' => 'Ce numéro de reçu a déjà servi à un enrôlement',
                 ], 403);
             }
 
@@ -126,7 +124,7 @@ class EnrollementController extends Controller
 
             $centreExamen = CentreExamen::findOrFail($request->centre_examen_id);
 
-            if (!$session->concours->centres->contains($centreExamen->id)) {
+            if (! $session->concours->centres->contains($centreExamen->id)) {
                 return response()->json(['message' => 'Centre invalide'], 403);
             }
 
@@ -138,7 +136,7 @@ class EnrollementController extends Controller
                 ->get()
                 ->first(fn ($s) => $s->enrollements_count < $s->capacite);
 
-            if (!$salle) {
+            if (! $salle) {
                 return response()->json(['message' => 'Aucune salle disponible'], 403);
             }
 
@@ -167,7 +165,7 @@ class EnrollementController extends Controller
             /**
              * 🔢 Numéro enrôlement
              */
-            $numeroEnrollement = 'ENR-' . date('Y') . '-' . strtoupper(uniqid());
+            $numeroEnrollement = 'ENR-'.date('Y').'-'.strtoupper(uniqid());
 
             /**
              * ✅ Création enrôlement
@@ -220,62 +218,62 @@ class EnrollementController extends Controller
 
             return response()->json([
                 'message' => 'Enrôlement effectué avec succès',
-                'enrollement' => $enrollement
+                'enrollement' => $enrollement,
             ], 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             return response()->json([
                 'message' => 'Erreur lors de l’enrôlement',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
 
-   /**
- * 📌 ADMIN : valider / refuser un enrôlement
- */
-public function update(Request $request, $id)
-{
-    $enrollement = Enrollement::find($id);
-    if (!$enrollement) {
-        return response()->json(['message' => 'Enrôlement non trouvé'], 404);
-    }
+    /**
+     * 📌 ADMIN : valider / refuser un enrôlement
+     */
+    public function update(Request $request, $id)
+    {
+        $enrollement = Enrollement::find($id);
+        if (! $enrollement) {
+            return response()->json(['message' => 'Enrôlement non trouvé'], 404);
+        }
 
-    if ($request->user()->role !== 'admin') {
+        if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
-    // Validation du statut
-    $request->validate([
-        'statut' => 'required|in:en_attente,valide,refuse'
-    ]);
+        // Validation du statut
+        $request->validate([
+            'statut' => 'required|in:en_attente,valide,refuse',
+        ]);
 
-    // Met à jour le statut
-    $enrollement->update(['statut' => $request->statut]);
+        // Met à jour le statut
+        $enrollement->update(['statut' => $request->statut]);
 
-    // Log de l'action
-    Logs::create([
-        'utilisateur_id' => auth()->id(),
-        'action' => 'Mise à jour enrôlement',
-        'details' => 'Enrôlement ' . $enrollement->numero_enrollement . ' => ' . $request->statut,
-        'ip' => $request->ip(),
-    ]);
+        // Log de l'action
+        Logs::create([
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Mise à jour enrôlement',
+            'details' => 'Enrôlement '.$enrollement->numero_enrollement.' => '.$request->statut,
+            'ip' => $request->ip(),
+        ]);
 
-    // Si l'enrôlement est validé, envoie un mail au candidat
-    if ($request->statut === 'valide') {
-        Mail::to($enrollement->utilisateur->email)
-            ->send(new ConfirmationEnrollement($enrollement));
+        // Si l'enrôlement est validé, envoie un mail au candidat
+        if ($request->statut === 'valide') {
+            Mail::to($enrollement->utilisateur->email)
+                ->send(new ConfirmationEnrollement($enrollement));
+        }
+
+        return response()->json([
+            'message' => 'Enrôlement mis à jour avec succès',
+            'enrollement' => $enrollement,
+        ]);
     }
-
-    return response()->json([
-        'message' => 'Enrôlement mis à jour avec succès',
-        'enrollement' => $enrollement
-    ]);
-}
-
 
     /**
      * 📌 ADMIN : supprimer
@@ -283,6 +281,7 @@ public function update(Request $request, $id)
     public function destroy($id)
     {
         Enrollement::findOrFail($id)->delete();
+
         return response()->json(['message' => 'Enrôlement supprimé']);
     }
 
@@ -291,7 +290,7 @@ public function update(Request $request, $id)
      */
     public function exportPdf($id)
     {
-        $enrollement = Enrollement::with(['utilisateur','session.concours','centreExamen','salle'])
+        $enrollement = Enrollement::with(['utilisateur', 'session.concours', 'centreExamen', 'salle'])
             ->findOrFail($id);
 
         if ($enrollement->utilisateur_id !== auth()->id()) {
@@ -303,10 +302,10 @@ public function update(Request $request, $id)
     }
 
     // Retourne le nombre d'enrollements en attente de validation
-public function pendingCount()
-{
-    $count = Enrollement::where('status', 'pending')->count(); // ou 'en_attente' selon ton champ
-    return response()->json(['pending_count' => $count]);
-}
+    public function pendingCount()
+    {
+        $count = Enrollement::where('status', 'pending')->count(); // ou 'en_attente' selon ton champ
 
+        return response()->json(['pending_count' => $count]);
+    }
 }

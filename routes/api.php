@@ -1,31 +1,28 @@
 <?php
+
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\EcoleController;
-use App\Http\Controllers\DepartementController;
-use App\Http\Controllers\FiliereController;
-use App\Http\Controllers\NiveauController;
+use App\Http\Controllers\CentreDepotController;
+use App\Http\Controllers\CentreExamenConcoursController;
+use App\Http\Controllers\CentreExamenController;
 use App\Http\Controllers\ConcoursController;
 use App\Http\Controllers\ConcoursSessionController;
+use App\Http\Controllers\DepartementController;
+use App\Http\Controllers\EcoleController;
 use App\Http\Controllers\EnrollementController;
+use App\Http\Controllers\FiliereController;
+use App\Http\Controllers\NiveauController;
 use App\Http\Controllers\PaiementController;
-use App\Http\Controllers\CentreExamenConcoursController;
-use App\Http\Controllers\CentreDepotController;
-use App\Http\Controllers\CentreExamenController;
 use App\Http\Controllers\SalleController;
 use App\Http\Controllers\StatsController;
 use Illuminate\Support\Facades\Route;
 
-//Iscription des candidats et création des admins
+// Iscription des candidats et création des admins
 // Connexion (login)
-
-
-
-
 
 Route::post('login', [AuthController::class, 'login']);
 
 Route::post('register', [AuthController::class, 'register']);
- // inscription candidat
+// inscription candidat
 Route::middleware('auth:sanctum')->post('create-admin', [AuthController::class, 'createAdmin']); // création admin
 Route::middleware('auth:sanctum')->get('enrollements/pending-count', [EnrollementController::class, 'pendingCount']);
 
@@ -40,7 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/stats', [StatsController::class, 'getStats']);
 Route::get('/concours/actifs', [StatsController::class, 'getConcours']);
-
 
 // Routes accessibles à tous les utilisateurs connectés
 Route::middleware('auth:sanctum')->group(function () {
@@ -135,7 +131,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('centre-examen/{id}', [CentreExamenController::class, 'update']);
     Route::delete('centre-examen/{id}', [CentreExamenController::class, 'destroy']);
 });
-
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('centre-examen-concours', [CentreExamenConcoursController::class, 'index']);

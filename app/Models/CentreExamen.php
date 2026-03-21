@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Salle;;
-use App\Models\Enrollement;
-use App\Models\Concours;
 
 class CentreExamen extends Model
 {
     use HasFactory;
- protected $table = 'centres_examen';
+
+    protected $table = 'centres_examen';
+
     protected $fillable = [
         'nom',
         'adresse',
@@ -35,7 +34,7 @@ class CentreExamen extends Model
     }
 
     public function concours()
-{
-    return $this->belongsToMany(Concours::class, 'concours_id');
-}
+    {
+        return $this->belongsToMany(Concours::class, 'concours_id');
+    }
 }

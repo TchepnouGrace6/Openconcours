@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Logs;
 use App\Models\Paiement;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-
 
 class PaiementController extends Controller
 {
@@ -22,7 +21,7 @@ class PaiementController extends Controller
         ]);
 
         // Génération automatique du numéro de reçu et référence transaction
-        $numeroRecu = 'REC-' . date('Y') . '-' . str_pad(Paiement::count() + 1, 6, '0', STR_PAD_LEFT);
+        $numeroRecu = 'REC-'.date('Y').'-'.str_pad(Paiement::count() + 1, 6, '0', STR_PAD_LEFT);
         $referenceTransaction = strtoupper(Str::random(10));
 
         // Création du paiement
@@ -40,7 +39,7 @@ class PaiementController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Création paiement',
-            'details' => 'Paiement créé - Reçu : ' . $numeroRecu . ' | Référence : ' . $referenceTransaction,
+            'details' => 'Paiement créé - Reçu : '.$numeroRecu.' | Référence : '.$referenceTransaction,
             'ip' => $request->ip(),
         ]);
 

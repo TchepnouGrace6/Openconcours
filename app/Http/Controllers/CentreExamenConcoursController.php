@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\CentreExamenConcours;
 use App\Models\Logs;
+use Illuminate\Http\Request;
 
 class CentreExamenConcoursController extends Controller
 {
@@ -14,6 +14,7 @@ class CentreExamenConcoursController extends Controller
     public function index()
     {
         $centres = CentreExamenConcours::with(['centreExamen', 'concours'])->paginate(10);
+
         return response()->json($centres);
     }
 
@@ -23,7 +24,10 @@ class CentreExamenConcoursController extends Controller
     public function show($id)
     {
         $centre = CentreExamenConcours::with(['centreExamen', 'concours'])->find($id);
-        if (!$centre) return response()->json(['message' => 'Centre de concours non trouvé'], 404);
+        if (! $centre) {
+            return response()->json(['message' => 'Centre de concours non trouvé'], 404);
+        }
+
         return response()->json($centre);
     }
 
@@ -34,7 +38,7 @@ class CentreExamenConcoursController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
@@ -48,7 +52,7 @@ class CentreExamenConcoursController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Création centre_examen_concours',
-            'details' => 'Centre ID: ' . $request->centre_examen_id . ' associé au Concours ID: ' . $request->concours_id,
+            'details' => 'Centre ID: '.$request->centre_examen_id.' associé au Concours ID: '.$request->concours_id,
             'ip' => $request->ip(),
         ]);
 
@@ -62,12 +66,14 @@ class CentreExamenConcoursController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
         $centre = CentreExamenConcours::find($id);
-        if (!$centre) return response()->json(['message' => 'Centre de concours non trouvé'], 404);
+        if (! $centre) {
+            return response()->json(['message' => 'Centre de concours non trouvé'], 404);
+        }
 
         $request->validate([
             'centre_examen_id' => 'required|exists:centres_examen,id',
@@ -79,7 +85,7 @@ class CentreExamenConcoursController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Mise à jour centre_examen_concours',
-            'details' => 'CentreExamenConcours ID: ' . $id,
+            'details' => 'CentreExamenConcours ID: '.$id,
             'ip' => $request->ip(),
         ]);
 
@@ -93,19 +99,21 @@ class CentreExamenConcoursController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
-        
+
         $centre = CentreExamenConcours::find($id);
-        if (!$centre) return response()->json(['message' => 'Centre de concours non trouvé'], 404);
+        if (! $centre) {
+            return response()->json(['message' => 'Centre de concours non trouvé'], 404);
+        }
 
         $centre->delete();
 
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Suppression centre_examen_concours',
-            'details' => 'CentreExamenConcours ID: ' . $id,
+            'details' => 'CentreExamenConcours ID: '.$id,
             'ip' => request()->ip(),
         ]);
 

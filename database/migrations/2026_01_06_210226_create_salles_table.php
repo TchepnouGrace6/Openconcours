@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('salles', function (Blueprint $table) {
-           $table->id();
+            $table->id();
             $table->foreignId('centres_examen_id')->constrained('centres_examen')->onDelete('cascade');
             $table->string('nom_salle');
             $table->integer('capacite'); // nombre de candidats que la salle peut contenir

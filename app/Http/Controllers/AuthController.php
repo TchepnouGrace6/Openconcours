@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Utilisateur;
 use App\Models\Logs;
+use App\Models\Utilisateur;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -16,7 +16,7 @@ class AuthController extends Controller
         $request->validate([
             'nom' => 'required|string|max:255',
             'email' => 'required|email|unique:utilisateurs,email',
-            'password' => ['required',Password::min(8)],
+            'password' => ['required', Password::min(8)],
         ]);
 
         $user = Utilisateur::create([
@@ -29,13 +29,13 @@ class AuthController extends Controller
         Logs::create([
             'utilisateur_id' => $user->id,
             'action' => 'Inscription candidat',
-            'details' => 'Email: ' . $user->email,
+            'details' => 'Email: '.$user->email,
             'ip' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Compte candidat créé avec succès',
-            'utilisateur' => $user
+            'utilisateur' => $user,
         ], 201);
     }
 
@@ -62,13 +62,13 @@ class AuthController extends Controller
         Logs::create([
             'utilisateur_id' => $request->user()->id,
             'action' => 'Création administrateur',
-            'details' => 'Email: ' . $admin->email,
+            'details' => 'Email: '.$admin->email,
             'ip' => $request->ip(),
         ]);
 
         return response()->json([
             'message' => 'Administrateur créé avec succès',
-            'utilisateur' => $admin
+            'utilisateur' => $admin,
         ], 201);
     }
 
@@ -82,7 +82,7 @@ class AuthController extends Controller
 
         $user = Utilisateur::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Identifiants invalides'], 401);
         }
 
@@ -92,16 +92,17 @@ class AuthController extends Controller
             'message' => 'Connexion réussie',
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user
+            'user' => $user,
         ]);
     }
-    public function showRegisterForm()
-{
-    return view('auth.register'); // Crée la vue auth/register.blade.php
-}
-   public function showLoginForm()
-{
-    return view('auth.login'); // Crée la vue auth/login.blade.php
-}
 
+    public function showRegisterForm()
+    {
+        return view('auth.register'); // Crée la vue auth/register.blade.php
+    }
+
+    public function showLoginForm()
+    {
+        return view('auth.login'); // Crée la vue auth/login.blade.php
+    }
 }

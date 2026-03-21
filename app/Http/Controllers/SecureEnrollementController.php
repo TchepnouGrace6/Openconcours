@@ -2,17 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ConfirmationEnrollement;
+use App\Models\CentreExamen;
+use App\Models\ConcoursSession;
+use App\Models\Enrollement;
+use App\Models\Paiement;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
-use Barryvdh\DomPDF\Facade\Pdf;
-
-use App\Models\Enrollement;
-use App\Models\Paiement;
-use App\Models\CentreExamen;
-use App\Models\ConcoursSession;
-use App\Mail\ConfirmationEnrollement;
 
 class SecureEnrollementController extends SecureBaseController
 {
@@ -26,7 +25,7 @@ class SecureEnrollementController extends SecureBaseController
             'page' => 'integer|min:1',
             'per_page' => 'integer|min:1|max:100',
             'status' => 'string|in:en_attente,valide,refuse',
-            'search' => 'string|max:255'
+            'search' => 'string|max:255',
         ]);
 
         $query = Enrollement::with([
@@ -35,7 +34,7 @@ class SecureEnrollementController extends SecureBaseController
             'paiement:id,numero_recu,montant',
             'centreExamen:id,nom',
             'centreDepot:id,nom',
-            'salle:id,nom'
+            'salle:id,nom',
         ]);
 
         // Filtres
@@ -47,16 +46,16 @@ class SecureEnrollementController extends SecureBaseController
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('nom', 'like', "%{$search}%")
-                  ->orWhere('prenom', 'like', "%{$search}%")
-                  ->orWhere('numero_enrollement', 'like', "%{$search}%");
+                    ->orWhere('prenom', 'like', "%{$search}%")
+                    ->orWhere('numero_enrollement', 'like', "%{$search}%");
             });
         }
 
         $enrollements = $query->orderByDesc('created_at')
-                             ->paginate($request->get('per_page', 15));
+            ->paginate($request->get('per_page', 15));
 
-        $this->logUserAction('Consultation liste enrôlements', 
-            "Page {$request->get('page', 1)}, Filtres: " . json_encode($request->only(['status', 'search'])));
+        $this->logUserAction('Consultation liste enrôlements',
+            "Page {$request->get('page', 1)}, Filtres: ".json_encode($request->only(['status', 'search'])));
 
         return $this->successResponse($enrollements);
     }
@@ -77,15 +76,15 @@ class SecureEnrollementController extends SecureBaseController
             'paiement',
             'centreExamen',
             'centreDepot',
-            'salle'
+            'salle',
         ])->find($validatedId);
 
-        if (!$enrollement) {
+        if (! $enrollement) {
             return $this->errorResponse('Enrôlement non trouvé', 404);
         }
 
         // Vérifier les permissions d'accès
-        if (!$this->checkResourceAccess($enrollement)) {
+        if (! $this->checkResourceAccess($enrollement)) {
             return $this->errorResponse('Accès non autorisé à cette ressource', 403);
         }
 
@@ -148,7 +147,7 @@ class SecureEnrollementController extends SecureBaseController
                 ->where('statut', 'paye')
                 ->first();
 
-            if (!$paiement) {
+            if (! $paiement) {
                 return $this->errorResponse('Numéro de reçu invalide ou paiement non confirmé', 403);
             }
 
@@ -163,7 +162,7 @@ class SecureEnrollementController extends SecureBaseController
 
             $centreExamen = CentreExamen::findOrFail($validatedData['centre_examen_id']);
 
-            if (!$session->concours->centres->contains($centreExamen->id)) {
+            if (! $session->concours->centres->contains($centreExamen->id)) {
                 return $this->errorResponse('Centre d\'examen non valide pour ce concours', 403);
             }
 
@@ -173,7 +172,7 @@ class SecureEnrollementController extends SecureBaseController
                 ->get()
                 ->first(fn ($s) => $s->enrollements_count < $s->capacite);
 
-            if (!$salle) {
+            if (! $salle) {
                 return $this->errorResponse('Aucune salle disponible dans ce centre', 403);
             }
 
@@ -183,7 +182,7 @@ class SecureEnrollementController extends SecureBaseController
             $photoPath = null;
             if ($request->hasFile('photo')) {
                 $photo = $request->file('photo');
-                $filename = 'photo_' . auth()->id() . '_' . time() . '.' . $photo->getClientOriginalExtension();
+                $filename = 'photo_'.auth()->id().'_'.time().'.'.$photo->getClientOriginalExtension();
                 $photoPath = $photo->storeAs('enrollements/photos', $filename, 'public');
             }
 
@@ -191,13 +190,13 @@ class SecureEnrollementController extends SecureBaseController
             $documentsPaths = [];
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $index => $doc) {
-                    $filename = 'doc_' . auth()->id() . '_' . time() . '_' . $index . '.' . $doc->getClientOriginalExtension();
+                    $filename = 'doc_'.auth()->id().'_'.time().'_'.$index.'.'.$doc->getClientOriginalExtension();
                     $documentsPaths[] = $doc->storeAs('enrollements/documents', $filename, 'public');
                 }
             }
 
             // Génération du numéro d'enrôlement unique
-            $numeroEnrollement = 'ENR-' . date('Y') . '-' . strtoupper(uniqid());
+            $numeroEnrollement = 'ENR-'.date('Y').'-'.strtoupper(uniqid());
 
             // Création de l'enrôlement
             $enrollement = Enrollement::create(array_merge($validatedData, [
@@ -211,7 +210,7 @@ class SecureEnrollementController extends SecureBaseController
                 'statut' => 'en_attente',
             ]));
 
-            $this->logUserAction('Création enrôlement', 
+            $this->logUserAction('Création enrôlement',
                 "Enrôlement {$numeroEnrollement} | Reçu {$validatedData['numero_recu']}");
 
             DB::commit();
@@ -220,10 +219,10 @@ class SecureEnrollementController extends SecureBaseController
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            $this->logUserAction('Erreur création enrôlement', 
+
+            $this->logUserAction('Erreur création enrôlement',
                 "Erreur: {$e->getMessage()}");
-            
+
             return $this->errorResponse('Erreur lors de l\'enrôlement', 500);
         }
     }
@@ -239,14 +238,14 @@ class SecureEnrollementController extends SecureBaseController
         }
 
         $enrollement = Enrollement::find($validatedId);
-        if (!$enrollement) {
+        if (! $enrollement) {
             return $this->errorResponse('Enrôlement non trouvé', 404);
         }
 
         try {
             $validatedData = $request->validate([
                 'statut' => 'required|in:en_attente,valide,refuse',
-                'commentaire' => 'nullable|string|max:500'
+                'commentaire' => 'nullable|string|max:500',
             ]);
         } catch (ValidationException $e) {
             return $this->errorResponse('Données invalides', 422, $e->errors());
@@ -255,7 +254,7 @@ class SecureEnrollementController extends SecureBaseController
         $ancienStatut = $enrollement->statut;
         $enrollement->update($validatedData);
 
-        $this->logUserAction('Mise à jour enrôlement', 
+        $this->logUserAction('Mise à jour enrôlement',
             "Enrôlement {$enrollement->numero_enrollement}: {$ancienStatut} => {$validatedData['statut']}");
 
         // Envoi d'email si validé
@@ -265,7 +264,7 @@ class SecureEnrollementController extends SecureBaseController
                     ->send(new ConfirmationEnrollement($enrollement));
             } catch (\Exception $e) {
                 // Log l'erreur mais ne fait pas échouer la requête
-                $this->logUserAction('Erreur envoi email', 
+                $this->logUserAction('Erreur envoi email',
                     "Enrôlement {$enrollement->numero_enrollement}: {$e->getMessage()}");
             }
         }
@@ -287,15 +286,15 @@ class SecureEnrollementController extends SecureBaseController
             'utilisateur',
             'session.concours',
             'centreExamen',
-            'salle'
+            'salle',
         ])->find($validatedId);
 
-        if (!$enrollement) {
+        if (! $enrollement) {
             return $this->errorResponse('Enrôlement non trouvé', 404);
         }
 
         // Vérifier les permissions
-        if (!$this->checkResourceAccess($enrollement)) {
+        if (! $this->checkResourceAccess($enrollement)) {
             return $this->errorResponse('Accès non autorisé', 403);
         }
 
@@ -303,7 +302,7 @@ class SecureEnrollementController extends SecureBaseController
 
         try {
             return Pdf::loadView('pdf.enrollement', compact('enrollement'))
-                ->download('enrollement_' . $enrollement->numero_enrollement . '.pdf');
+                ->download('enrollement_'.$enrollement->numero_enrollement.'.pdf');
         } catch (\Exception $e) {
             return $this->errorResponse('Erreur lors de la génération du PDF', 500);
         }

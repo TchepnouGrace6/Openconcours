@@ -16,9 +16,9 @@ return new class extends Migration
             $table->foreignId('concours_id')->constrained('concours')->onDelete('cascade'); // lien avec le concours
             $table->string('nom_session'); // ex: "Session principale", "Rattrapage"
             $table->date('date_session'); // date de la session
-             $table->foreignId('centres_examen_id')->constrained('centres_examen')->onDelete('cascade');
-            //$table->string('centres_examen'); // centre d'examen
-            //$table->string('salle')->nullable(); // salle
+            $table->foreignId('centres_examen_id')->constrained('centres_examen')->onDelete('cascade');
+            // $table->string('centres_examen'); // centre d'examen
+            // $table->string('salle')->nullable(); // salle
             $table->timestamps();
         });
     }

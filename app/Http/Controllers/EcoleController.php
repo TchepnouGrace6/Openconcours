@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Ecole;
 use App\Models\Logs;
+use Illuminate\Http\Request;
 
 class EcoleController extends Controller
 {
@@ -12,6 +12,7 @@ class EcoleController extends Controller
     public function index()
     {
         $ecoles = Ecole::paginate(10);
+
         return response()->json($ecoles);
     }
 
@@ -19,9 +20,10 @@ class EcoleController extends Controller
     public function show($id)
     {
         $ecole = Ecole::find($id);
-        if (!$ecole) {
+        if (! $ecole) {
             return response()->json(['message' => 'École non trouvée'], 404);
         }
+
         return response()->json($ecole);
     }
 
@@ -30,7 +32,7 @@ class EcoleController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
         $request->validate([
@@ -43,16 +45,15 @@ class EcoleController extends Controller
         $ecole = Ecole::create($request->all());
 
         Logs::create([
-                'utilisateur_id' => auth()->id(),
-                'action' => 'Création école',
-                'details' => 'École: ' . $ecole->nom,
-                'ip' => $request->ip(),
-            ]);
-
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Création école',
+            'details' => 'École: '.$ecole->nom,
+            'ip' => $request->ip(),
+        ]);
 
         return response()->json([
             'message' => 'École créée avec succès',
-            'ecole' => $ecole
+            'ecole' => $ecole,
         ], 201);
     }
 
@@ -61,17 +62,17 @@ class EcoleController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
-        
+
         $ecole = Ecole::find($id);
-        if (!$ecole) {
+        if (! $ecole) {
             return response()->json(['message' => 'École non trouvée'], 404);
         }
 
         $request->validate([
-            'nom' => 'required|string|unique:ecoles,nom,' . $ecole->id,
+            'nom' => 'required|string|unique:ecoles,nom,'.$ecole->id,
             'adresse' => 'nullable|string',
             'ville' => 'nullable|string',
             'pays' => 'nullable|string',
@@ -80,15 +81,15 @@ class EcoleController extends Controller
         $ecole->update($request->all());
 
         Logs::create([
-        'utilisateur_id' => auth()->id(),
-        'action' => 'Modification école',
-        'details' => 'École: ' . $ecole->nom,
-        'ip' => $request->ip(),
-    ]);
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Modification école',
+            'details' => 'École: '.$ecole->nom,
+            'ip' => $request->ip(),
+        ]);
 
         return response()->json([
             'message' => 'École mise à jour avec succès',
-            'ecole' => $ecole
+            'ecole' => $ecole,
         ]);
     }
 
@@ -97,23 +98,23 @@ class EcoleController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
         $ecole = Ecole::find($id);
-        if (!$ecole) {
+        if (! $ecole) {
             return response()->json(['message' => 'École non trouvée'], 404);
         }
         $nomEcole = $ecole->nom; // garder le nom avant suppression
         $ecole->delete();
 
-         // 🔹 Log
-            Logs::create([
-                'utilisateur_id' => auth()->id(),
-                'action' => 'Suppression école',
-                'details' => 'École: ' . $nomEcole,
-                'ip' => request()->ip(),
-            ]);
+        // 🔹 Log
+        Logs::create([
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Suppression école',
+            'details' => 'École: '.$nomEcole,
+            'ip' => request()->ip(),
+        ]);
 
         return response()->json(['message' => 'École supprimée avec succès']);
     }

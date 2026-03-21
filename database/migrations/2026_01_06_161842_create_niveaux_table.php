@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('niveaux', function (Blueprint $table) {
-             $table->id();
+            $table->id();
             $table->string('nom'); // ex: L1, L2, M1
             $table->foreignId('filiere_id')->constrained('filieres')->onDelete('cascade'); // lien avec la filière
             $table->timestamps();
-        
+
         });
     }
 

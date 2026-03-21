@@ -24,12 +24,7 @@ return new class extends Migration
 
             $table->decimal('montant', 10, 2);
 
-            
-
-           
             $table->string('moyen_paiement')->default('manuel');
-
-           
 
             $table->timestamps();
         });

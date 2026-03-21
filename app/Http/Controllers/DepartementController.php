@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Departement;
 use App\Models\Logs;
+use Illuminate\Http\Request;
 
 class DepartementController extends Controller
 {
@@ -12,6 +12,7 @@ class DepartementController extends Controller
     public function index()
     {
         $departements = Departement::with('ecole')->paginate(10);
+
         return response()->json($departements);
     }
 
@@ -19,9 +20,10 @@ class DepartementController extends Controller
     public function show($id)
     {
         $departement = Departement::with('ecole')->find($id);
-        if (!$departement) {
+        if (! $departement) {
             return response()->json(['message' => 'Département non trouvé'], 404);
         }
+
         return response()->json($departement);
     }
 
@@ -30,7 +32,7 @@ class DepartementController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
@@ -42,17 +44,16 @@ class DepartementController extends Controller
 
         $departement = Departement::create($request->all());
 
-            Logs::create([
+        Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Création département',
-            'details' => 'Département: ' . $departement->nom,
+            'details' => 'Département: '.$departement->nom,
             'ip' => $request->ip(),
-            ]);
-
+        ]);
 
         return response()->json([
             'message' => 'Département créé avec succès',
-            'departement' => $departement
+            'departement' => $departement,
         ], 201);
     }
 
@@ -61,17 +62,17 @@ class DepartementController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
         $departement = Departement::find($id);
-        if (!$departement) {
+        if (! $departement) {
             return response()->json(['message' => 'Département non trouvé'], 404);
         }
 
         $request->validate([
-            'nom' => 'required|string|unique:departements,nom,' . $departement->id,
+            'nom' => 'required|string|unique:departements,nom,'.$departement->id,
             'description' => 'nullable|string',
             'ecole_id' => 'required|exists:ecoles,id',
         ]);
@@ -79,16 +80,15 @@ class DepartementController extends Controller
         $departement->update($request->all());
 
         Logs::create([
-        'utilisateur_id' => auth()->id(),
-        'action' => 'Modification département',
-        'details' => 'Département: ' . $departement->nom,
-        'ip' => $request->ip(),
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Modification département',
+            'details' => 'Département: '.$departement->nom,
+            'ip' => $request->ip(),
         ]);
-
 
         return response()->json([
             'message' => 'Département mis à jour avec succès',
-            'departement' => $departement
+            'departement' => $departement,
         ]);
     }
 
@@ -97,24 +97,24 @@ class DepartementController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
         $departement = Departement::find($id);
-        if (!$departement) {
+        if (! $departement) {
             return response()->json(['message' => 'Département non trouvé'], 404);
         }
         $nomDepartement = $departement->nom;
         $departement->delete();
 
-         // 🔹 Log
-            Logs::create([
-                'utilisateur_id' => auth()->id(),
-                'action' => 'Suppression département',
-                'details' => 'Département: ' . $nomDepartement,
-                'ip' => request()->ip(),
-            ]);
+        // 🔹 Log
+        Logs::create([
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Suppression département',
+            'details' => 'Département: '.$nomDepartement,
+            'ip' => request()->ip(),
+        ]);
 
         return response()->json(['message' => 'Département supprimé avec succès']);
     }

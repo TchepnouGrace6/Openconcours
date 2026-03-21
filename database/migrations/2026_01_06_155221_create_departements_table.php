@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('departements', function (Blueprint $table) {
-             $table->id();
+            $table->id();
             $table->string('nom')->unique(); // nom du département
             $table->string('description', 200)->nullable(); // description du département
             $table->foreignId('ecole_id')->constrained('ecoles')->onDelete('cascade'); // lien avec l'école

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Niveau;
 use App\Models\Logs;
+use App\Models\Niveau;
+use Illuminate\Http\Request;
 
 class NiveauController extends Controller
 {
@@ -12,6 +12,7 @@ class NiveauController extends Controller
     public function index()
     {
         $niveaux = Niveau::paginate(10);
+
         return response()->json($niveaux);
     }
 
@@ -19,9 +20,10 @@ class NiveauController extends Controller
     public function show($id)
     {
         $niveau = Niveau::find($id);
-        if (!$niveau) {
+        if (! $niveau) {
             return response()->json(['message' => 'Niveau non trouvé'], 404);
         }
+
         return response()->json($niveau);
     }
 
@@ -30,7 +32,7 @@ class NiveauController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
@@ -42,16 +44,15 @@ class NiveauController extends Controller
         $niveau = Niveau::create($request->all());
 
         Logs::create([
-                'utilisateur_id' => auth()->id(),
-                'action' => 'Création niveau',
-                'details' => 'Niveau: ' . $niveau->nom,
-                'ip' => $request->ip(),
-            ]);
-
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Création niveau',
+            'details' => 'Niveau: '.$niveau->nom,
+            'ip' => $request->ip(),
+        ]);
 
         return response()->json([
             'message' => 'Niveau créé avec succès',
-            'niveau' => $niveau
+            'niveau' => $niveau,
         ], 201);
     }
 
@@ -60,34 +61,32 @@ class NiveauController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
         $niveau = Niveau::find($id);
-        if (!$niveau) {
+        if (! $niveau) {
             return response()->json(['message' => 'Niveau non trouvé'], 404);
         }
 
         $request->validate([
-            'nom' => 'required|string|unique:niveaux,nom,' . $niveau->id,
+            'nom' => 'required|string|unique:niveaux,nom,'.$niveau->id,
             'filiere_id' => 'required|exists:filieres,id',
         ]);
 
         $niveau->update($request->all());
 
-         Logs::create([
-                'utilisateur_id' => auth()->id(),
-                'action' => 'Modification niveau',
-                'details' => 'Niveau: '. $niveau->nom,
-                'ip' => $request->ip(),
-            ]);
-
-
+        Logs::create([
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Modification niveau',
+            'details' => 'Niveau: '.$niveau->nom,
+            'ip' => $request->ip(),
+        ]);
 
         return response()->json([
-            'message' => "Niveau mis à jour avec succès",
-            "niveau" => $niveau
+            'message' => 'Niveau mis à jour avec succès',
+            'niveau' => $niveau,
         ]);
     }
 
@@ -96,31 +95,29 @@ class NiveauController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
-        
+
         $niveau = Niveau::find($id);
-        if (!$niveau) {
-            return response()->json(['message' => "Niveau non trouvé"], 404);
+        if (! $niveau) {
+            return response()->json(['message' => 'Niveau non trouvé'], 404);
         }
-         Logs::create([
-                'utilisateur_id' => auth()->id(),
-                'action' => "Suppression niveau",
-                "details" => "Nivau: ". $niveau->nom,
-                "ip" =>$request->ip(),
-            ]);
-        
-         // 🔹 Log
-         Logs::create([
-             "utilisateur_id" =>$user ?$user->id : null,
-             "action" =>'Suppression niveau',
-             "details" =>'Nivau: '.  $nomEcole,
-             "ip" =>$request->ip(),
-         ]);
+        Logs::create([
+            'utilisateur_id' => auth()->id(),
+            'action' => 'Suppression niveau',
+            'details' => 'Nivau: '.$niveau->nom,
+            'ip' => $request->ip(),
+        ]);
 
+        // 🔹 Log
+        Logs::create([
+            'utilisateur_id' => $user ? $user->id : null,
+            'action' => 'Suppression niveau',
+            'details' => 'Nivau: '.$nomEcole,
+            'ip' => $request->ip(),
+        ]);
 
-
-       return response()->json(["message"=>"Nivau supprimé avec succès"]);
-   }
+        return response()->json(['message' => 'Nivau supprimé avec succès']);
+    }
 }

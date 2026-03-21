@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Candidat;
 use App\Models\Ecole;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +21,7 @@ class StatsController extends Controller
             return response()->json($stats, 200);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Erreur lors de la récupération des statistiques'
+                'error' => 'Erreur lors de la récupération des statistiques',
             ], 500);
         }
     }
@@ -40,7 +39,7 @@ class StatsController extends Controller
             return response()->json($concours, 200);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Erreur lors de la récupération des concours'
+                'error' => 'Erreur lors de la récupération des concours',
             ], 500);
         }
     }

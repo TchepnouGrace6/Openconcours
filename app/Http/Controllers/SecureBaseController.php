@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Logs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use App\Models\Logs;
 
 abstract class SecureBaseController extends Controller
 {
@@ -13,45 +13,45 @@ abstract class SecureBaseController extends Controller
      */
     protected function validateId($id, $fieldName = 'id')
     {
-        if (!is_numeric($id) || $id <= 0) {
+        if (! is_numeric($id) || $id <= 0) {
             return response()->json([
                 'message' => "ID invalide pour {$fieldName}",
-                'error' => 'INVALID_ID'
+                'error' => 'INVALID_ID',
             ], 400);
         }
-        
+
         return (int) $id;
     }
-    
+
     /**
      * Vérifier les permissions d'accès à une ressource
      */
     protected function checkResourceAccess($resource, $userId = null)
     {
         $user = auth()->user();
-        
+
         // Admin a accès à tout
         if ($user->isAdmin()) {
             return true;
         }
-        
+
         // Candidat ne peut accéder qu'à ses propres ressources
         if ($userId && $resource->utilisateur_id !== $user->id) {
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Logger une action utilisateur
      */
-    protected function logUserAction($action, $details = '', Request $request = null)
+    protected function logUserAction($action, $details = '', ?Request $request = null)
     {
-        if (!$request) {
+        if (! $request) {
             $request = request();
         }
-        
+
         try {
             Logs::create([
                 'utilisateur_id' => auth()->id(),
@@ -63,11 +63,11 @@ abstract class SecureBaseController extends Controller
             Log::error('Erreur lors du logging', [
                 'error' => $e->getMessage(),
                 'action' => $action,
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
         }
     }
-    
+
     /**
      * Réponse standardisée pour les erreurs
      */
@@ -76,16 +76,16 @@ abstract class SecureBaseController extends Controller
         $response = [
             'success' => false,
             'message' => $message,
-            'error_code' => $code
+            'error_code' => $code,
         ];
-        
+
         if ($errors) {
             $response['errors'] = $errors;
         }
-        
+
         return response()->json($response, $code);
     }
-    
+
     /**
      * Réponse standardisée pour les succès
      */
@@ -93,16 +93,16 @@ abstract class SecureBaseController extends Controller
     {
         $response = [
             'success' => true,
-            'message' => $message
+            'message' => $message,
         ];
-        
+
         if ($data !== null) {
             $response['data'] = $data;
         }
-        
+
         return response()->json($response, $code);
     }
-    
+
     /**
      * Nettoyer les données d'entrée
      */
@@ -112,6 +112,7 @@ abstract class SecureBaseController extends Controller
             if (is_string($value)) {
                 return trim(strip_tags($value));
             }
+
             return $value;
         }, $data);
     }

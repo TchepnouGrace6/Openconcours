@@ -4,13 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\CentreExamen;
-use App\Models\Enrollement;
 
 class Salle extends Model
 {
     use HasFactory;
- protected $table = 'salles';
+
+    protected $table = 'salles';
 
     protected $fillable = [
         'centre_examen_id',

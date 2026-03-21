@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\CentreDepot;
 use App\Models\Logs;
+use Illuminate\Http\Request;
 
 class CentreDepotController extends Controller
 {
@@ -14,6 +14,7 @@ class CentreDepotController extends Controller
     public function index()
     {
         $centres = CentreDepot::paginate(10);
+
         return response()->json($centres);
     }
 
@@ -23,7 +24,10 @@ class CentreDepotController extends Controller
     public function show($id)
     {
         $centre = CentreDepot::find($id);
-        if (!$centre) return response()->json(['message' => 'Centre de dépôt non trouvé'], 404);
+        if (! $centre) {
+            return response()->json(['message' => 'Centre de dépôt non trouvé'], 404);
+        }
+
         return response()->json($centre);
     }
 
@@ -34,7 +38,7 @@ class CentreDepotController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
@@ -49,7 +53,7 @@ class CentreDepotController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Création centre_depot',
-            'details' => 'Centre: ' . $centre->nom,
+            'details' => 'Centre: '.$centre->nom,
             'ip' => $request->ip(),
         ]);
 
@@ -63,12 +67,14 @@ class CentreDepotController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
 
         $centre = CentreDepot::find($id);
-        if (!$centre) return response()->json(['message' => 'Centre de dépôt non trouvé'], 404);
+        if (! $centre) {
+            return response()->json(['message' => 'Centre de dépôt non trouvé'], 404);
+        }
 
         $request->validate([
             'concours_id' => 'required|exists:concours,id',
@@ -81,7 +87,7 @@ class CentreDepotController extends Controller
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Mise à jour centre_depot',
-            'details' => 'CentreDepot ID: ' . $id,
+            'details' => 'CentreDepot ID: '.$id,
             'ip' => $request->ip(),
         ]);
 
@@ -95,19 +101,21 @@ class CentreDepotController extends Controller
     {
         if ($request->user()->role !== 'admin') {
             return response()->json([
-                'message' => 'Accès refusé. Admin uniquement.'
+                'message' => 'Accès refusé. Admin uniquement.',
             ], 403);
         }
-        
+
         $centre = CentreDepot::find($id);
-        if (!$centre) return response()->json(['message' => 'Centre de dépôt non trouvé'], 404);
+        if (! $centre) {
+            return response()->json(['message' => 'Centre de dépôt non trouvé'], 404);
+        }
 
         $centre->delete();
 
         Logs::create([
             'utilisateur_id' => auth()->id(),
             'action' => 'Suppression centre_depot',
-            'details' => 'CentreDepot ID: ' . $id,
+            'details' => 'CentreDepot ID: '.$id,
             'ip' => request()->ip(),
         ]);
 

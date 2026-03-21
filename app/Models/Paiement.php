@@ -4,8 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\ConcoursSession;
-use App\Models\Utilisateur;
 
 class Paiement extends Model
 {
