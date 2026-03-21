@@ -2,91 +2,92 @@ name: CI/CD — OpenConcours
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: ["main", "develop"]
 
 jobs:
 
-  # ============================================================
-  # JOB 1 — LINT (Qualité du code)
-  # ============================================================
   lint:
-    name: 🔍 Linting (Laravel Pint)
+    name: Linting (Laravel Pint)
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.2.0'
           tools: composer
 
-      - name: Installation des dépendances
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
 
-      - name: Linting avec Laravel Pint
+      - name: Run Pint
         run: ./vendor/bin/pint
 
-  # ============================================================
-  # JOB 2 — TESTS (Unitaires + Feature)
-  # ============================================================
+
   tests:
-    name: 🧪 Tests automatiques
+    name: Tests automatiques
     runs-on: ubuntu-latest
     needs: lint
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: shivammathur/setup-php@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.2.0'
           extensions: mbstring, pdo, pdo_sqlite, sqlite3, xml, zip, gd, bcmath
 
-      - name: Installation des dépendances
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
 
-      - name: Copie du fichier .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Setup .env
+        run: cp .env.example .env
 
-      - name: Génération de la clé
+      - name: Generate app key
         run: php artisan key:generate
 
-      - name: Permissions des dossiers
+      - name: Set permissions
         run: chmod -R 777 storage bootstrap/cache
 
-      - name: Création de la base SQLite
+      - name: Setup SQLite database
         run: |
           mkdir -p database
           touch database/database.sqlite
 
-      - name: Lancement des tests
+      - name: Run migrations
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan migrate --force
+
+      - name: Run tests
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
         run: php artisan test
 
-  # ============================================================
-  # JOB 3 — BUILD DOCKER
-  # ============================================================
+
   build:
-    name: 🐳 Build Docker
+    name: Build Docker
     runs-on: ubuntu-latest
     needs: tests
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Connexion à Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build et push de l'image Docker
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -95,50 +96,30 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/openconcours:latest
             ${{ secrets.DOCKER_USERNAME }}/openconcours:${{ github.sha }}
 
-  # ============================================================
-  # JOB 4 — DÉPLOIEMENT STAGING (branche develop)
-  # ============================================================
+
   deploy-staging:
-    name: 🚀 Déploiement Staging
+    name: Deploy Staging
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/develop'
-    environment:
-      name: staging
-      url: ${{ vars.STAGING_URL }}
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Déploiement sur Railway (Staging)
+      - name: Deploy to Railway (Staging)
         uses: bervProject/railway-deploy@main
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN_STAGING }}
           service: ${{ secrets.RAILWAY_SERVICE_STAGING }}
 
-      - name: Notification staging
-        run: echo "✅ Déploiement staging réussi"
 
-  # ============================================================
-  # JOB 5 — DÉPLOIEMENT PRODUCTION (branche main)
-  # ============================================================
   deploy-production:
-    name: 🏭 Déploiement Production
+    name: Deploy Production
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
-    environment:
-      name: production
-      url: ${{ vars.PRODUCTION_URL }}
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Déploiement sur Railway (Production)
+      - name: Deploy to Railway (Production)
         uses: bervProject/railway-deploy@main
         with:
           railway_token: ${{ secrets.RAILWAY_TOKEN_PRODUCTION }}
           service: ${{ secrets.RAILWAY_SERVICE_PRODUCTION }}
-
-      - name: Notification production
-        run: echo "✅ Déploiement production réussi"
