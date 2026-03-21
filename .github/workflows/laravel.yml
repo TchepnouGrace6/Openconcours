@@ -20,7 +20,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.2.0'
           tools: composer
 
       - name: Installation des dépendances
@@ -42,7 +42,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.2.0'
           extensions: mbstring, pdo, pdo_sqlite, sqlite3, xml, zip, gd, bcmath
 
       - name: Installation des dépendances
