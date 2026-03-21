@@ -64,21 +64,18 @@ jobs:
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
-<<<<<<< HEAD
-=======
       - name: Run migrations
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
->>>>>>> f826a7608f729c002c58b60c8a9d9b185f71c18a
       - name: Run tests
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
-        run: php artisan test
+  env:
+    APP_ENV: testing
+    DB_CONNECTION: sqlite
+    DB_DATABASE: database/database.sqlite
+  run: php artisan test --stop-on-failure
 
 
   build:
