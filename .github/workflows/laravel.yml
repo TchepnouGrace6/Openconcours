@@ -58,7 +58,6 @@ jobs:
         run: |
           mkdir -p database
           touch database/database.sqlite
-
       - name: Run migrations
         env:
           DB_CONNECTION: sqlite
@@ -95,8 +94,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/openconcours:latest
             ${{ secrets.DOCKER_USERNAME }}/openconcours:${{ github.sha }}
-
-
   deploy-staging:
     name: Deploy Staging
     runs-on: ubuntu-latest
