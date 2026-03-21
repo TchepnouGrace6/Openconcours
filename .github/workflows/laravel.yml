@@ -62,12 +62,19 @@ jobs:
           DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
+
+      - name: Debug PHP version and extensions
+        run: |
+          php --version
+          php -m | grep -E "xdebug|pcov" || echo "Aucun driver de couverture installé"
+          ./vendor/bin/phpunit --version
       - name: Run tests
+      
         env:
           APP_ENV: testing
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
-        run: php artisan test --stop-on-failure
+        run: php artisan test --no-coverage
 
   build:
     name: Build Docker
