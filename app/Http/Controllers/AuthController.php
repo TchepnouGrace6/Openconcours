@@ -10,7 +10,7 @@ use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
-    // Inscription candidat au concours
+    // Inscription candidat
     public function register(Request $request)
     {
         $request->validate([
