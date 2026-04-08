@@ -83,28 +83,4 @@ jobs:
             ${{ secrets.OP_DOCKERHUB_LOGIN }}/openconcours:latest
             ${{ secrets.OP_DOCKERHUB_LOGIN }}/openconcours:${{ github.sha }}
 
-  deploy-staging:
-    name: Deploy Staging
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/develop'
-    steps:
-      - name: Deploy to Railway (Staging)
-        uses: bervProject/railway-deploy@main
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_STAGING }}
-        with:
-          service: ${{ secrets.RAILWAY_SERVICE_STAGING }}
-
-  deploy-production:
-    name: Deploy Production
-    runs-on: ubuntu-latest
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Deploy to Railway (Production)
-        uses: bervProject/railway-deploy@main
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN_PRODUCTION }}
-        with:
-          service: ${{ secrets.RAILWAY_SERVICE_PRODUCTION }}
+ 
