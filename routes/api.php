@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 // Iscription des candidats et création des admins
 // Connexion (login)
-
+ Route::get('ecoles', [EcoleController::class, 'index']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::post('register', [AuthController::class, 'register']);
@@ -31,7 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('ecoles/{id}', [EcoleController::class, 'update']);
     Route::delete('ecoles/{id}', [EcoleController::class, 'destroy']);
 
-    Route::get('ecoles', [EcoleController::class, 'index']);
+   
     Route::get('ecoles/{id}', [EcoleController::class, 'show']);
 });
 
